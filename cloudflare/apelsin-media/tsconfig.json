@@ -1,0 +1,17 @@
+{
+	"compilerOptions": {
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"target": "es2024",
+		"verbatimModuleSyntax": false,
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"moduleResolution": "Bundler",
+		"module": "es2022",
+		"noEmit": true,
+		"lib": ["es2024"],
+		"types": ["@cloudflare/workers-types"]
+	},
+	"exclude": ["node_modules"],
+	"include": ["src"]
+}

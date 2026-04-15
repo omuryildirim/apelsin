@@ -1,0 +1,75 @@
+name: deploy
+description: Deploys the application to the specified environment
+
+inputs:
+  stage:
+    description: The stage to deploy to (eg. dev, prod)
+    required: true
+  accountId:
+    description: The aws account id to deploy to (eg. 123456789012)
+    required: true
+  vapidPublicKey:
+    description: VAPID public key for web push notifications
+    required: true
+  vapidPrivateKey:
+    description: VAPID private key for web push notifications
+    required: true
+  vapidSubject:
+    description: VAPID subject (mailto or https URL)
+    required: true
+  wsDomainName:
+    description: WebSocket domain name
+    required: true
+  originSecret:
+    description: Shared secret for origin protection (CF Workers inject, Lambdas verify)
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: "Setup pnpm"
+      uses: pnpm/action-setup@v4
+      with:
+        version: 10.28.0
+
+    - name: Setup node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 24
+        cache: "pnpm"
+
+    - name: Install Dependencies
+      run: pnpm install --frozen-lockfile # use frozen lockfile for reproducible dependencies
+      shell: bash
+      working-directory: ./aws/cdk
+
+    - name: Install Dependencies
+      run: pnpm build # use frozen lockfile for reproducible dependencies
+      shell: bash
+      working-directory: ./aws/cdk
+
+    - name: Bootstrap # this can be removed after the first deployment to save time
+      run: |
+        pnpm cdk bootstrap
+      shell: bash
+      working-directory: ./aws/cdk
+      env:
+        VAPID_PUBLIC_KEY: ${{ inputs.vapidPublicKey }}
+        VAPID_PRIVATE_KEY: ${{ inputs.vapidPrivateKey }}
+        VAPID_SUBJECT: ${{ inputs.vapidSubject }}
+        WS_DOMAIN_NAME: ${{ inputs.wsDomainName }}
+        ORIGIN_SECRET: ${{ inputs.originSecret }}
+
+    - name: Deploy
+      shell: bash
+      working-directory: ./aws/cdk
+      run: |
+        pnpm cdk deploy --all --require-approval never
+      env:
+        VAPID_PUBLIC_KEY: ${{ inputs.vapidPublicKey }}
+        VAPID_PRIVATE_KEY: ${{ inputs.vapidPrivateKey }}
+        VAPID_SUBJECT: ${{ inputs.vapidSubject }}
+        WS_DOMAIN_NAME: ${{ inputs.wsDomainName }}
+        ORIGIN_SECRET: ${{ inputs.originSecret }}

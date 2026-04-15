@@ -1,0 +1,49 @@
+# Deploy AWS CDK stack (backend: Lambda, DynamoDB, API Gateway, S3)
+#
+# To use this workflow:
+# 1. Set up OIDC trust between GitHub and your AWS account
+#    https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services
+# 2. Configure these repository variables (Settings > Secrets and variables > Actions):
+#    - DEPLOY_ROLE_ARN: arn:aws:iam::<account>:role/<role-name>
+#    - STAGE: dev | prod
+#    - VAPID_PUBLIC_KEY: your VAPID public key (generate with `npx web-push generate-vapid-keys`)
+#    - VAPID_SUBJECT: mailto:you@example.com
+#    - WS_DOMAIN_NAME: your WebSocket custom domain (optional)
+# 3. Configure these repository secrets:
+#    - VAPID_PRIVATE_KEY: your VAPID private key
+#    - ORIGIN_SECRET: shared secret between Cloudflare Workers and Lambda (optional)
+
+name: Deploy AWS
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  packages: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: ./.github/actions/oidc
+        id: oidc
+        if: ${{ vars.DEPLOY_ROLE_ARN != '' }}
+        with:
+          role: ${{ vars.DEPLOY_ROLE_ARN }}
+
+      - uses: ./.github/actions/deploy
+        name: Deploy
+        with:
+          accountId: ${{ steps.oidc.outputs.account-id }}
+          stage: ${{ vars.STAGE }}
+          vapidPublicKey: ${{ vars.VAPID_PUBLIC_KEY }}
+          vapidPrivateKey: ${{ secrets.VAPID_PRIVATE_KEY }}
+          vapidSubject: ${{ vars.VAPID_SUBJECT }}
+          wsDomainName: ${{ vars.WS_DOMAIN_NAME }}
+          originSecret: ${{ secrets.ORIGIN_SECRET }}

@@ -1,0 +1,13 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "apelsin-media",
+	"main": "src/index.ts",
+	"compatibility_date": "2026-04-06",
+	"upload_source_maps": true,
+	"observability": {
+		"enabled": true
+	},
+	"compatibility_flags": [
+		"nodejs_compat"
+	]
+}

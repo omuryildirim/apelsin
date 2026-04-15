@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@theme {
+	--font-sans:
+		"Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
+		"Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+html,
+body {
+	@apply bg-white dark:bg-gray-950;
+
+	@media (prefers-color-scheme: dark) {
+		color-scheme: dark;
+	}
+}
+
+html,
+body {
+	overscroll-behavior: none;
+	height: 100%;
+	overflow: hidden;
+}
+
+/* Lock the body so iOS Safari can't scroll the page when the keyboard
+ * opens. Without this, iOS auto-scrolls the body to bring the focused
+ * input into view — pushing the header off-screen and leaving a visible
+ * gap between the container and the keyboard. With the body locked,
+ * iOS leaves the layout alone and the visualViewport-tracked container
+ * height (--app-height) is the only thing that adjusts. */
+body {
+	position: fixed;
+	inset: 0;
+	width: 100%;
+}
+
+:root {
+	--app-height: 100dvh;
+}

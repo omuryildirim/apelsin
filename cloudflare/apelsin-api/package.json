@@ -1,0 +1,23 @@
+{
+  "name": "cloudflare-workers-openapi",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "lint:fix": "biome check --write ./src",
+    "start": "wrangler dev",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "chanfana": "2.6.3",
+    "hono": "4.6.20",
+    "uuid": "13.0.0",
+    "zod": "3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "25.5.2",
+    "@types/service-worker-mock": "2.0.4",
+    "wrangler": "4.80.0"
+  }
+}
