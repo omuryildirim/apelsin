@@ -7,7 +7,7 @@ Apelsin (Russian for "orange") is a WhatsApp-like end-to-end encrypted messaging
 ## Tech Stack
 
 ### Backend (AWS CDK)
-- **Location**: `aws/cdk/`
+- **Location**: `aws/`
 - **Runtime**: Node.js 24, TypeScript, Lambda functions
 - **Database**: DynamoDB (multiple tables)
 - **Storage**: S3 (private, media served via authenticated endpoint)
@@ -43,7 +43,7 @@ Apelsin (Russian for "orange") is a WhatsApp-like end-to-end encrypted messaging
 | ApelsinUsers | email | - | - | User accounts (email, displayName, passwordHash, publicKeyJwk, lastSeen) |
 | ApelsinDeviceSessions | deviceToken | - | email-index | Per-device auth sessions (email, deviceId, deviceInfo, ttl) |
 | ApelsinConnections | connectionId | - | email-index | Active WebSocket connections (email, ttl) |
-| ApelsinMessages | chatId | sk | - | Chat messages (sk = zero-padded timestamp#uuid, ttl 7 days) |
+| ApelsinMessages | chatId | sk | - | Chat messages (sk = zero-padded timestamp#uuid, optional ttl 7 days) |
 | ApelsinContacts | email | contactEmail | contactEmail-index | Connection requests & accepted contacts (status: pending/accepted/declined) |
 | ApelsinPushSubscriptions | email | endpoint | - | Web push subscriptions per device |
 | ApelsinPairingSessions | sessionId | - | - | QR device linking sessions (ttl 5 min) |

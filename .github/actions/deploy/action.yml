@@ -43,18 +43,18 @@ runs:
     - name: Install Dependencies
       run: pnpm install --frozen-lockfile # use frozen lockfile for reproducible dependencies
       shell: bash
-      working-directory: ./aws/cdk
+      working-directory: ./aws
 
     - name: Install Dependencies
       run: pnpm build # use frozen lockfile for reproducible dependencies
       shell: bash
-      working-directory: ./aws/cdk
+      working-directory: ./aws
 
     - name: Bootstrap # this can be removed after the first deployment to save time
       run: |
         pnpm cdk bootstrap
       shell: bash
-      working-directory: ./aws/cdk
+      working-directory: ./aws
       env:
         VAPID_PUBLIC_KEY: ${{ inputs.vapidPublicKey }}
         VAPID_PRIVATE_KEY: ${{ inputs.vapidPrivateKey }}
@@ -64,7 +64,7 @@ runs:
 
     - name: Deploy
       shell: bash
-      working-directory: ./aws/cdk
+      working-directory: ./aws
       run: |
         pnpm cdk deploy --all --require-approval never
       env:

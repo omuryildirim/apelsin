@@ -16,7 +16,7 @@ Media keys are content-addressed (chat media is `chat-media/{chatId}/{uuid}`), s
 | Name | Kind | Description |
 |---|---|---|
 | `ORIGIN_HOST_NAME` | var | AWS Media API Gateway URL, e.g. `https://yyy.execute-api.eu-west-1.amazonaws.com` |
-| `ORIGIN_SECRET` | secret | Must match the `ORIGIN_SECRET` in `aws/cdk/.env` |
+| `ORIGIN_SECRET` | secret | Must match the `ORIGIN_SECRET` in `aws/.env` |
 
 ## Deploy
 
@@ -24,7 +24,7 @@ Media keys are content-addressed (chat media is `chat-media/{chatId}/{uuid}`), s
 pnpm install
 
 wrangler secret put ORIGIN_SECRET
-# paste the same value as aws/cdk/.env
+# paste the same value as aws/.env
 
 wrangler deploy --var ORIGIN_HOST_NAME:https://YOUR_MEDIA_API_ID.execute-api.eu-west-1.amazonaws.com
 ```

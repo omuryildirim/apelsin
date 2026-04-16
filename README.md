@@ -53,14 +53,14 @@ Rough estimates for a personal or small-group deployment:
 |---|---|
 | Cloudflare Workers (3 workers) | **$0** on the free tier (100k req/day), **$5/mo** on Workers Paid if you exceed it |
 | AWS Lambda | **$0** — free tier covers it comfortably |
-| DynamoDB (on-demand) | **cents/month** at small scale; messages auto-expire after 7 days |
+| DynamoDB (on-demand) | **cents/month** at small scale |
 | S3 (media) | **cents/month** — a few GB of photos and voice notes |
 | API Gateway (HTTP + Media + WebSocket) | **$0–$1/mo** — 1M req/month free for the first year, then $1 per million |
 | Domain | ~**$1/mo** (annualized) |
 
 **Typical total: under $5/month for a family or small team. Often $0 if you stay in the free tiers.**
 
-The [cost guardrails](aws/cdk/README.md#cost-guardrails) (API Gateway throttling + Lambda reserved concurrency) bound the worst-case bill even under sustained abuse — you can't get surprise-billed into the thousands.
+The [cost guardrails](aws/README.md#cost-guardrails) (API Gateway throttling + optional Lambda reserved concurrency) bound the worst-case bill even under sustained abuse — you can't get surprise-billed into the thousands.
 
 ## Architecture at a glance
 
@@ -114,10 +114,10 @@ Media serving runs on its own HTTP API with its own Lambda, separate from the ma
 The CF Workers inject a shared `X-Origin-Secret` header on every request to AWS. Lambdas reject requests without it.
 
 - **Why:** the AWS API Gateway URLs would otherwise be publicly reachable. This makes "hit the Lambda directly, bypass the worker" impossible, and costs $0.
-- **Tradeoff:** rotating the secret requires coordinated deploys on both sides (see [aws/cdk/README.md](aws/cdk/README.md)).
+- **Tradeoff:** rotating the secret requires coordinated deploys on both sides (see [aws/README.md](aws/README.md)).
 
-### Cost guardrails (API Gateway throttling + Lambda reserved concurrency)
-Every API has a burst + sustained rate limit. Every Lambda has reserved concurrency capped at 20.
+### Cost guardrails (API Gateway throttling + optional Lambda reserved concurrency)
+Every API has a burst + sustained rate limit. Additionally, every Lambda can have reserved concurrency capped at 20.
 
 - **Why:** bounds the worst-case monthly bill to a small, predictable number even under sustained abuse. $0 to configure.
 - **Tradeoff:** the caps are account-wide, not per-IP. A single abusive user can still trip them. For a personal or small-team deployment, that's the right tradeoff; for large-scale use you'd want WAF rate limits on top.
@@ -146,7 +146,7 @@ You will need:
 Rough sequence:
 
 1. Generate VAPID keys: `npx web-push generate-vapid-keys`
-2. Deploy AWS infrastructure — see [aws/cdk/README.md](aws/cdk/README.md)
+2. Deploy AWS infrastructure — see [aws/README.md](aws/README.md)
 3. Deploy the three Cloudflare Workers — see [cloudflare/apelsin-api/README.md](cloudflare/apelsin-api/README.md), [cloudflare/apelsin-media/README.md](cloudflare/apelsin-media/README.md), [cloudflare/apelsin-fe/README.md](cloudflare/apelsin-fe/README.md)
 4. Point your domain at the workers in Cloudflare DNS
 5. Open the frontend URL — register and you're in
@@ -156,7 +156,7 @@ For fully automated deploys via GitHub Actions, see [.github/workflows/README.md
 ## Documentation
 
 - [CLAUDE.md](CLAUDE.md) — full architecture reference (tables, Lambda routes, hooks, libraries)
-- [aws/cdk/README.md](aws/cdk/README.md) — CDK stack deployment, DNS, cost guardrails, secret rotation
+- [aws/README.md](aws/README.md) — CDK stack deployment, DNS, cost guardrails, secret rotation
 - [cloudflare/apelsin-fe/README.md](cloudflare/apelsin-fe/README.md) — frontend build & deploy, local dev
 - [cloudflare/apelsin-api/README.md](cloudflare/apelsin-api/README.md) — API proxy worker
 - [cloudflare/apelsin-media/README.md](cloudflare/apelsin-media/README.md) — media proxy worker with edge caching

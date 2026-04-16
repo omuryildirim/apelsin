@@ -13,7 +13,7 @@ Vite build-time variables — must be set at `pnpm build`, not at runtime:
 | `VITE_API_BASE_URL` | API worker URL, e.g. `https://apelsin-api.yourdomain.com` |
 | `VITE_WS_URL` | WebSocket URL, e.g. `wss://apelsin-ws.yourdomain.com` |
 | `VITE_MEDIA_URL` | Media worker URL, e.g. `https://apelsin-media.yourdomain.com` |
-| `VITE_VAPID_PUBLIC_KEY` | Same VAPID public key as in `aws/cdk/.env` |
+| `VITE_VAPID_PUBLIC_KEY` | Same VAPID public key as in `aws/.env` |
 
 Put them in `cloudflare/apelsin-fe/.env` for local dev, or export them before `pnpm build` in CI.
 

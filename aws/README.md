@@ -2,7 +2,7 @@
 
 The backend stack: HTTP API Gateway, Media API Gateway, WebSocket API Gateway, Lambdas, DynamoDB tables, and the private S3 bucket. All in one `ApelsinStack` defined in [lib/apelsin-stack.ts](lib/apelsin-stack.ts).
 
-## Environment variables (`aws/cdk/.env`)
+## Environment variables (`aws/.env`)
 
 Loaded by [bin/apelsin.ts](bin/apelsin.ts) via `dotenv/config`.
 
@@ -23,7 +23,7 @@ npx web-push generate-vapid-keys
 ## Deploy
 
 ```bash
-cd aws/cdk
+cd aws
 pnpm install
 pnpm cdk bootstrap    # first time only, per AWS account + region
 pnpm cdk deploy
@@ -64,12 +64,10 @@ Two mechanisms bound the worst-case monthly bill even under sustained abuse. Bot
 
 These are account-wide, not per-IP. Adjust in [lib/apelsin-stack.ts](lib/apelsin-stack.ts) if legitimate traffic exceeds them.
 
-**Lambda reserved concurrency** — caps simultaneous instances per function at 20. Worst-case Lambda cost under attack stays in single digits per month. Override per-function via the `extra` argument to `makeFn()` if a hot path needs more headroom.
-
 ## Rotating the origin secret
 
 1. `openssl rand -hex 32`
-2. Update `aws/cdk/.env`
+2. Update `aws/.env`
 3. `pnpm cdk deploy` (updates all Lambda env vars)
 4. Update both CF Workers: `wrangler secret put ORIGIN_SECRET` in each worker directory. Or, for GitHub Actions, update the `ORIGIN_SECRET` repo secret and redeploy.
 

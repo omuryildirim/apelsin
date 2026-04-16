@@ -139,7 +139,10 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
         Item: {
           ...message,
           sk: messageSortKey(message.timestamp, message.id),
-          ttl: Math.floor(Date.now() / 1000) + 604800, // 7 days
+          // Can be activated if you don't want to keep message history server side
+          // The con will be with current approach we will not be able to recover
+          // chat history in new devices or if user logs out or if the indexedDB gets cleared
+          // ttl: Math.floor(Date.now() / 1000) + 604800, // 7 days
         },
       }),
     );
