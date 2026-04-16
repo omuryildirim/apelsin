@@ -41,12 +41,11 @@ runs:
         cache: "pnpm"
 
     - name: Install Dependencies
-      run: pnpm install --frozen-lockfile # use frozen lockfile for reproducible dependencies
+      run: pnpm install --frozen-lockfile
       shell: bash
-      working-directory: ./aws
 
-    - name: Install Dependencies
-      run: pnpm build # use frozen lockfile for reproducible dependencies
+    - name: Build
+      run: pnpm build
       shell: bash
       working-directory: ./aws
 
