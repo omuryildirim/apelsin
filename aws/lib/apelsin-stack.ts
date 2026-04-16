@@ -262,6 +262,7 @@ export class ApelsinStack extends cdk.Stack {
 
     const messageFn = makeFn("WsMessageFn", "ws-message.ts");
     connectionsTable.grantReadData(messageFn);
+    contactsTable.grantReadData(messageFn);
     messageFn.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ["execute-api:ManageConnections"],
@@ -310,6 +311,7 @@ export class ApelsinStack extends cdk.Stack {
     usersTable.grantReadWriteData(usersFn);
     deviceSessionsTable.grantReadData(usersFn);
     connectionsTable.grantReadData(usersFn);
+    contactsTable.grantReadData(usersFn);
 
     const profileFn = makeFn("ProfileFn", "http-profile.ts");
     usersTable.grantReadWriteData(profileFn);
@@ -336,6 +338,7 @@ export class ApelsinStack extends cdk.Stack {
     const signalsFn = makeFn("SignalsFn", "http-signals.ts");
     signalsTable.grantReadWriteData(signalsFn);
     deviceSessionsTable.grantReadData(signalsFn);
+    contactsTable.grantReadData(signalsFn);
 
     const callFn = makeFn("CallFn", "http-call.ts");
     callsTable.grantReadWriteData(callFn);
@@ -343,6 +346,7 @@ export class ApelsinStack extends cdk.Stack {
     pushSubscriptionsTable.grantReadWriteData(callFn);
     usersTable.grantReadData(callFn);
     deviceSessionsTable.grantReadData(callFn);
+    contactsTable.grantReadData(callFn);
     callFn.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ["execute-api:ManageConnections"],

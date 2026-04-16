@@ -2,7 +2,7 @@ import { PutCommand } from "@aws-sdk/lib-dynamodb";
 import type { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { db, Tables } from "./shared/db";
 import { ok, err } from "./shared/utils";
-import { authenticate, isAuthError } from "./shared/auth";
+import { authenticate, isAuthError, authorizeContactAccess } from "./shared/auth";
 import { verifyOrigin } from "./shared/origin";
 import { sendPush } from "./shared/push";
 import { getDisplayName } from "./shared/queries";
@@ -26,6 +26,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     const body = JSON.parse(event.body ?? "{}");
     const to = (typeof body.to === "string" ? body.to : "").trim().toLowerCase();
     if (!to) return err("to is required");
+
+    const contactErr = await authorizeContactAccess(user.email, to);
+    if (contactErr) return contactErr;
 
     // Store call record
     await db.send(new PutCommand({

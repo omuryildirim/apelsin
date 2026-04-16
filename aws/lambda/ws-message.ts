@@ -5,6 +5,7 @@ import {
 } from "@aws-sdk/client-apigatewaymanagementapi";
 import type { APIGatewayProxyWebsocketEventV2 } from "aws-lambda";
 import { db, Tables, WS_ENDPOINT } from "./shared/db";
+import { authorizeContactAccess } from "./shared/auth";
 
 let mgmt: ApiGatewayManagementApiClient | undefined;
 function getMgmt() {
@@ -47,6 +48,9 @@ export const handler = async (event: APIGatewayProxyWebsocketEventV2) => {
     if (!conn || conn.email !== body.from) {
       return { statusCode: 403, body: "From email does not match authenticated user" };
     }
+
+    const contactErr = await authorizeContactAccess(body.from, body.to);
+    if (contactErr) return { statusCode: 403, body: "You are not connected with this user" };
 
     // Find all connections belonging to the target user
     const { Items = [] } = await db.send(

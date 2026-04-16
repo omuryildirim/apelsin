@@ -62,3 +62,31 @@ export function isAuthError(
 ): result is ReturnType<typeof err> {
   return typeof result === "object" && result !== null && "statusCode" in result;
 }
+
+export const authorizeChatAccess = (chatId: string, email: string): ReturnType<typeof err> | null => {
+  const participants = chatId.split("__");
+  if (participants.length !== 2 || !participants.includes(email)) {
+    return err("You are not a participant in this chat", 403);
+  }
+  return null;
+};
+
+export const authorizeOwnership = (resourceEmail: string, userEmail: string): ReturnType<typeof err> | null =>
+  resourceEmail === userEmail ? null : err("You can only modify your own resources", 403);
+
+export const authorizeContactAccess = async (email: string, targetEmail: string): Promise<ReturnType<typeof err> | null> => {
+  const { Item } = await db.send(new GetCommand({
+    TableName: Tables.contacts,
+    Key: { email, contactEmail: targetEmail },
+  }));
+  if (Item?.status === "accepted") return null;
+
+  // Check reverse direction
+  const { Item: reverse } = await db.send(new GetCommand({
+    TableName: Tables.contacts,
+    Key: { email: targetEmail, contactEmail: email },
+  }));
+  if (reverse?.status === "accepted") return null;
+
+  return err("You are not connected with this user", 403);
+};

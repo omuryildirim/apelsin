@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import type { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { db, Tables, WS_ENDPOINT } from "./shared/db";
 import { normalizeChatId, messageSortKey, ok, err } from "./shared/utils";
-import { authenticate, isAuthError } from "./shared/auth";
+import { authenticate, isAuthError, authorizeChatAccess, authorizeOwnership } from "./shared/auth";
 import { verifyOrigin } from "./shared/origin";
 import { sendPush } from "./shared/push";
 import { getDisplayName } from "./shared/queries";
@@ -92,6 +92,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
     const normalizedChatId = normalizeChatId(chatId);
 
+    const accessErr = authorizeChatAccess(normalizedChatId, user.email);
+    if (accessErr) return accessErr;
+
     const { Items = [] } = await db.send(
       new QueryCommand({
         TableName: Tables.messages,
@@ -117,6 +120,12 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     const chatId = typeof raw.chatId === "string" ? normalizeChatId(raw.chatId) : "";
 
     if (!author || !chatId || !raw.type) return err("Missing required fields");
+
+    const ownershipErr = authorizeOwnership(author, user.email);
+    if (ownershipErr) return ownershipErr;
+
+    const accessErr = authorizeChatAccess(chatId, user.email);
+    if (accessErr) return accessErr;
 
     const message: Message = {
       id: uuidv4(),
@@ -161,6 +170,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     const emoji = typeof raw.emoji === "string" ? raw.emoji : "";
 
     if (!chatId || !sk || !emoji) return err("chatId, sk, and emoji are required");
+
+    const accessErr = authorizeChatAccess(chatId, user.email);
+    if (accessErr) return accessErr;
 
     // Read current message
     const { Item } = await db.send(new GetCommand({

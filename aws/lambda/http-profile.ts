@@ -4,7 +4,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { db, Tables, MEDIA_BUCKET } from "./shared/db";
 import { ok, err } from "./shared/utils";
-import { authenticate, isAuthError } from "./shared/auth";
+import { authenticate, isAuthError, authorizeOwnership } from "./shared/auth";
 import { verifyOrigin } from "./shared/origin";
 
 const s3 = new S3Client({});
@@ -45,6 +45,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     const email = (typeof body.email === "string" ? body.email : "").trim().toLowerCase();
     if (!email) return err("email is required");
 
+    const ownershipErr = authorizeOwnership(email, user.email);
+    if (ownershipErr) return ownershipErr;
+
     const { Item } = await db.send(new GetCommand({ TableName: Tables.users, Key: { email } }));
     if (!Item) return err("User not found", 404);
 
@@ -77,6 +80,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     const email = (typeof body.email === "string" ? body.email : "").trim().toLowerCase();
     const contentType = (typeof body.contentType === "string" ? body.contentType : "image/jpeg");
     if (!email) return err("email is required");
+
+    const ownershipErr = authorizeOwnership(email, user.email);
+    if (ownershipErr) return ownershipErr;
 
     const key = `profiles/${email}/photo`;
 
