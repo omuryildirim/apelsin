@@ -11,13 +11,13 @@
   },
   "dependencies": {
     "chanfana": "2.6.3",
-    "hono": "4.6.20",
+    "hono": "4.12.14",
     "uuid": "13.0.0",
     "zod": "3.24.1"
   },
   "devDependencies": {
-    "@types/node": "25.5.2",
+    "@types/node": "25.6.0",
     "@types/service-worker-mock": "2.0.4",
-    "wrangler": "4.80.0"
+    "wrangler": "4.83.0"
   }
 }
