@@ -1,4 +1,4 @@
-import { GetCommand } from "@aws-sdk/lib-dynamodb";
+import { GetCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { db, Tables } from "./db";
 
 /** Fetch a user record by email. Returns the raw Item or null. */
@@ -13,4 +13,16 @@ export const getUser = async (email: string) => {
 export const getDisplayName = async (email: string): Promise<string> => {
   const user = await getUser(email);
   return (user?.displayName as string) || email;
+};
+
+// Accepted contacts are written bidirectionally, so a single-direction query is sufficient.
+export const getAcceptedContactEmails = async (email: string): Promise<string[]> => {
+  const { Items = [] } = await db.send(new QueryCommand({
+    TableName: Tables.contacts,
+    KeyConditionExpression: "email = :e",
+    FilterExpression: "#s = :s",
+    ExpressionAttributeNames: { "#s": "status" },
+    ExpressionAttributeValues: { ":e": email, ":s": "accepted" },
+  }));
+  return Items.map((item) => item.contactEmail as string);
 };

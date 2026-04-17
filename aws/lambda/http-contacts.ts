@@ -4,6 +4,7 @@ import { db, Tables } from "./shared/db";
 import { ok, err } from "./shared/utils";
 import { authenticate, isAuthError } from "./shared/auth";
 import { verifyOrigin } from "./shared/origin";
+import { getAcceptedContactEmails } from "./shared/queries";
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   const { method, path: rawPath } = event.requestContext.http;
@@ -85,20 +86,13 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
   // ── GET /api/contacts — list accepted connections ───────────────────────
   if (method === "GET" && rawPath === "/api/contacts") {
-    // Accepted contacts are written bidirectionally, so querying one direction is sufficient.
-    const { Items = [] } = await db.send(new QueryCommand({
-      TableName: Tables.contacts,
-      KeyConditionExpression: "email = :e",
-      FilterExpression: "#s = :s",
-      ExpressionAttributeNames: { "#s": "status" },
-      ExpressionAttributeValues: { ":e": user.email, ":s": "accepted" },
-    }));
+    const contactEmails = await getAcceptedContactEmails(user.email);
 
     const contacts = await Promise.all(
-      Items.map(async (item) => {
+      contactEmails.map(async (email) => {
         const { Item } = await db.send(new GetCommand({
           TableName: Tables.users,
-          Key: { email: item.contactEmail as string },
+          Key: { email },
         }));
         if (!Item) return null;
         return {

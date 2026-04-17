@@ -3,6 +3,7 @@ import { ApiGatewayManagementApiClient, PostToConnectionCommand } from "@aws-sdk
 import type { APIGatewayProxyWebsocketEventV2 } from "aws-lambda";
 import { db, Tables, WS_ENDPOINT } from "./shared/db";
 import { cancelCall as checkAndcancelCall } from "./shared/call";
+import { getAcceptedContactEmails } from "./shared/queries";
 
 let mgmt: ApiGatewayManagementApiClient | undefined;
 function getMgmt() {
@@ -55,32 +56,10 @@ export const handler = async (event: APIGatewayProxyWebsocketEventV2) => {
     await checkAndcancelCall(email);
   }
 
-  // Get contacts of this user to broadcast "offline" only to them
-  const [outgoing, incoming] = await Promise.all([
-    db.send(new QueryCommand({
-      TableName: Tables.contacts,
-      KeyConditionExpression: "email = :e",
-      FilterExpression: "#s = :s",
-      ExpressionAttributeNames: { "#s": "status" },
-      ExpressionAttributeValues: { ":e": email, ":s": "accepted" },
-    })),
-    db.send(new QueryCommand({
-      TableName: Tables.contacts,
-      IndexName: "contactEmail-index",
-      KeyConditionExpression: "contactEmail = :e",
-      FilterExpression: "#s = :s",
-      ExpressionAttributeNames: { "#s": "status" },
-      ExpressionAttributeValues: { ":e": email, ":s": "accepted" },
-    })),
-  ]);
+  const contactEmails = await getAcceptedContactEmails(email);
 
-  const contactEmails = new Set<string>();
-  for (const item of (outgoing.Items ?? [])) contactEmails.add(item.contactEmail as string);
-  for (const item of (incoming.Items ?? [])) contactEmails.add(item.email as string);
-
-  // Get connections for each contact
   const connResults = await Promise.all(
-    Array.from(contactEmails).map((e) =>
+    contactEmails.map((e) =>
       db.send(new QueryCommand({
         TableName: Tables.connections,
         IndexName: "email-index",
