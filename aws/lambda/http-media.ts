@@ -3,7 +3,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { MEDIA_BUCKET } from "./shared/db";
 import { ok, err, corsHeaders } from "./shared/utils";
-import { authenticate, isAuthError } from "./shared/auth";
+import { authenticate, isAuthError, authorizeChatAccess } from "./shared/auth";
 import { verifyOrigin } from "./shared/origin";
 
 const s3 = new S3Client({});
@@ -26,15 +26,11 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     const key = rawPath.replace("/api/media/", "");
     if (!key) return err("key is required");
 
-    // Access control: chat media keys are "chat-media/{chatId}/{id}"
-    // chatId is "email1__email2" — verify the requester is a participant
     if (key.startsWith("chat-media/")) {
       const chatId = key.split("/")[1];
       if (chatId) {
-        const participants = chatId.split("__");
-        if (!participants.includes(user.email)) {
-          return err("Access denied", 403);
-        }
+        const chatErr = authorizeChatAccess(chatId, user.email);
+        if (chatErr) return chatErr;
       }
     }
 
@@ -69,11 +65,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     const contentType = (typeof body.contentType === "string" ? body.contentType : "image/webp");
     if (!chatId) return err("chatId is required");
 
-    // Verify the requester is a participant in this chat
-    const participants = chatId.split("__");
-    if (!participants.includes(user.email)) {
-      return err("Access denied", 403);
-    }
+    const chatErr = authorizeChatAccess(chatId, user.email);
+    if (chatErr) return chatErr;
 
     const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     const key = `chat-media/${chatId}/${id}`;

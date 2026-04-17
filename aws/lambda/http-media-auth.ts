@@ -3,6 +3,7 @@ import type { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { db, Tables } from "./shared/db";
 import { ok } from "./shared/utils";
 import { verifyOrigin } from "./shared/origin";
+import { authorizeChatAccess } from "./shared/auth";
 
 /**
  * POST /api/auth/verify-media
@@ -57,11 +58,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   // Chat media (chat-media/{chatId}/{id}) — only participants
   if (mediaKey.startsWith("chat-media/")) {
     const chatId = mediaKey.split("/")[1];
-    if (chatId) {
-      const participants = chatId.split("__");
-      if (!participants.includes(email)) {
-        return ok({ authorized: false, reason: "Not a participant" });
-      }
+    if (chatId && authorizeChatAccess(chatId, email)) {
+      return ok({ authorized: false, reason: "Not a participant" });
     }
     return ok({ authorized: true, email });
   }
