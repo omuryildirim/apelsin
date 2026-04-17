@@ -80,13 +80,5 @@ export const authorizeContactAccess = async (email: string, targetEmail: string)
     Key: { email, contactEmail: targetEmail },
   }));
   if (Item?.status === "accepted") return null;
-
-  // Check reverse direction
-  const { Item: reverse } = await db.send(new GetCommand({
-    TableName: Tables.contacts,
-    Key: { email: targetEmail, contactEmail: email },
-  }));
-  if (reverse?.status === "accepted") return null;
-
   return err("You are not connected with this user", 403);
 };

@@ -85,8 +85,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
   // ── GET /api/contacts — list accepted connections ───────────────────────
   if (method === "GET" && rawPath === "/api/contacts") {
-    // My outgoing accepted
-    const { Items: outgoing = [] } = await db.send(new QueryCommand({
+    // Accepted contacts are written bidirectionally, so querying one direction is sufficient.
+    const { Items = [] } = await db.send(new QueryCommand({
       TableName: Tables.contacts,
       KeyConditionExpression: "email = :e",
       FilterExpression: "#s = :s",
@@ -94,27 +94,11 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       ExpressionAttributeValues: { ":e": user.email, ":s": "accepted" },
     }));
 
-    // Incoming accepted (via GSI)
-    const { Items: incoming = [] } = await db.send(new QueryCommand({
-      TableName: Tables.contacts,
-      IndexName: "contactEmail-index",
-      KeyConditionExpression: "contactEmail = :e",
-      FilterExpression: "#s = :s",
-      ExpressionAttributeNames: { "#s": "status" },
-      ExpressionAttributeValues: { ":e": user.email, ":s": "accepted" },
-    }));
-
-    // Collect unique contact emails
-    const contactEmails = new Set<string>();
-    for (const item of outgoing) contactEmails.add(item.contactEmail as string);
-    for (const item of incoming) contactEmails.add(item.email as string);
-
-    // Fetch user profiles
     const contacts = await Promise.all(
-      Array.from(contactEmails).map(async (email) => {
+      Items.map(async (item) => {
         const { Item } = await db.send(new GetCommand({
           TableName: Tables.users,
-          Key: { email },
+          Key: { email: item.contactEmail as string },
         }));
         if (!Item) return null;
         return {
