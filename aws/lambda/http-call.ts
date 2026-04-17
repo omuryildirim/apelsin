@@ -64,7 +64,12 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   if (method === "POST" && rawPath === "/api/call/cancel") {
     const body = JSON.parse(event.body ?? "{}");
     const to = (typeof body.to === "string" ? body.to : "").trim().toLowerCase();
+
     if (!to) return err("to is required");
+
+    const contactErr = await authorizeContactAccess(user.email, to);
+    if (contactErr) return contactErr;
+
     await cancelCall(user.email);
 
     return ok({ message: "Call cancelled" });
