@@ -39,19 +39,6 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     return ok({ message: "Public key stored" });
   }
 
-  // ── GET /api/users ───────────────────────────────────────────────────────
-  if (method === "GET" && rawPath === "/api/users") {
-    const excludeEmail = (event.queryStringParameters?.excludeEmail ?? "").trim().toLowerCase();
-    const { Items = [] } = await db.send(new ScanCommand({ TableName: Tables.users }));
-    const result = Items.filter((u) => u.email !== excludeEmail).map((u) => ({
-      userId: u.userId,
-      email: u.email,
-      displayName: u.displayName,
-      photoUrl: u.photoUrl,
-    }));
-    return ok(result);
-  }
-
   // ── GET /api/users/public-key/{email} ────────────────────────────────────
   if (method === "GET" && rawPath.startsWith("/api/users/public-key/")) {
     const email = decodeURIComponent(event.pathParameters?.email ?? "").trim().toLowerCase();

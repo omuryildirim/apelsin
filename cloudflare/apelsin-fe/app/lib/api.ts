@@ -522,23 +522,6 @@ export const api = {
 		}
 	},
 
-	async getUsers(excludeEmail?: string): Promise<ChatUser[]> {
-		try {
-			const url = excludeEmail
-				? `${API_BASE}/api/users?excludeEmail=${encodeURIComponent(excludeEmail)}`
-				: `${API_BASE}/api/users`;
-			const res = await fetch(url, {
-				method: "GET",
-				headers: authHeaders(),
-			});
-			if (!res.ok) throw new Error("Failed to fetch users");
-			return res.json();
-		} catch (error) {
-			console.error("Error fetching users:", error);
-			return [];
-		}
-	},
-
 	async getContacts(): Promise<ChatUser[]> {
 		try {
 			const res = await fetch(`${API_BASE}/api/contacts`, {
