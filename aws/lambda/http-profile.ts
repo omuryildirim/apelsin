@@ -4,7 +4,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import type { APIGatewayProxyHandlerV2 } from "aws-lambda";
 import { db, Tables, MEDIA_BUCKET } from "./shared/db";
 import { ok, err } from "./shared/utils";
-import { authenticate, isAuthError, authorizeOwnership } from "./shared/auth";
+import { authenticate, isAuthError, authorizeOwnership, authorizeContactAccess } from "./shared/auth";
 import { verifyOrigin } from "./shared/origin";
 
 const s3 = new S3Client({});
@@ -26,6 +26,11 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   if (method === "GET" && rawPath.startsWith("/api/profile/")) {
     const email = decodeURIComponent(event.pathParameters?.email ?? "").trim().toLowerCase();
     if (!email) return err("email is required");
+
+    if (authorizeOwnership(email, user.email)) {
+      const contactErr = await authorizeContactAccess(user.email, email);
+      if (contactErr) return contactErr;
+    }
 
     const { Item } = await db.send(new GetCommand({ TableName: Tables.users, Key: { email } }));
     if (!Item) return err("User not found", 404);
