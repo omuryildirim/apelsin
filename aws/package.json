@@ -17,7 +17,7 @@
     "@aws-sdk/lib-dynamodb": "^3.750.0",
     "@aws-sdk/s3-request-presigner": "^3.750.0",
     "aws-cdk-lib": "^2.170.0",
-    "bcryptjs": "^2.4.3",
+    "bcryptjs": "^3.0.3",
     "constructs": "^10.4.2",
     "dotenv": "^17.4.1",
     "uuid": "^11.0.0",
@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147",
-    "@types/bcryptjs": "^2.4.6",
+    "@types/bcryptjs": "^3.0.0",
     "@types/node": "^25.6.0",
     "@types/source-map-support": "^0.5.10",
     "@types/uuid": "^10.0.0",
