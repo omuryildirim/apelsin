@@ -9,8 +9,8 @@
     "typecheck": "tsc"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250620.0",
+    "@cloudflare/workers-types": "^4.20260420.1",
     "typescript": "6.0.3",
-    "wrangler": "4.80.0"
+    "wrangler": "4.83.0"
   }
 }
