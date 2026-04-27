@@ -11,12 +11,12 @@
     "diff": "cdk diff"
   },
   "dependencies": {
-    "@aws-sdk/client-apigatewaymanagementapi": "^3.750.0",
-    "@aws-sdk/client-dynamodb": "^3.750.0",
-    "@aws-sdk/client-s3": "^3.750.0",
-    "@aws-sdk/lib-dynamodb": "^3.750.0",
-    "@aws-sdk/s3-request-presigner": "^3.750.0",
-    "aws-cdk-lib": "^2.170.0",
+    "@aws-sdk/client-apigatewaymanagementapi": "^3.1037.0",
+    "@aws-sdk/client-dynamodb": "^3.1037.0",
+    "@aws-sdk/client-s3": "^3.1037.0",
+    "@aws-sdk/lib-dynamodb": "^3.1037.0",
+    "@aws-sdk/s3-request-presigner": "^3.1037.0",
+    "aws-cdk-lib": "^2.251.0",
     "bcryptjs": "^2.4.3",
     "constructs": "^10.4.2",
     "dotenv": "^17.4.1",
@@ -30,8 +30,8 @@
     "@types/source-map-support": "^0.5.10",
     "@types/uuid": "^10.0.0",
     "@types/web-push": "^3.6.4",
-    "aws-cdk": "^2.170.0",
-    "esbuild": "^0.25.0",
+    "aws-cdk": "^2.1119.0",
+    "esbuild": "^0.28.0",
     "source-map-support": "^0.5.21",
     "typescript": "6.0.3"
   }
